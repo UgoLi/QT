@@ -1,0 +1,240 @@
+回顾：
+显示：QLabel、QFrame、QMessageBox
+输入：QLineEdit
+事件处理：
+	void paintEvent(QPaintEvent*);
+	void timerEvent(QTimerEvent*);
+	void mousePressEvent(QMouseEvent*);
+	void mouseReleaseEvent(QMouseEvent*);
+	void mouseMoveEvent(QMouseEvent*);
+	...
+其它：QDir、QRect、QTime、QVector、QStringList
+      foreach(for循环)...
+-----------------------
+十一 鼠标和键盘事件
+1 鼠标事件处理
+...
+2 键盘事件处理
+#include <QKeyEvent>
+//按键按下
+QWidget::keyPressEvent(QKeyEvent*)
+//按键抬起
+QWidget::keyReleaseEvent(QKeyEvent*)
+
+int	key();//获取按键代码
+QString	text();//获取按键文本
+
+《案例》按键测试，打印按键代码和文本
+工程名：Keyboard
+类名：KeyboardDialog
+
+===============================
+十二 sqlite数据库(了解)
+1 数据库简介
+1）什么是数据库
+   数据库指的是以一定方式存储，能为多个用户共享，具有尽可能小冗余的特性，是与应用程度彼此独立数据集合。
+
+2）数据相关术语
+DB		数据库
+DBA 	数据库管理员
+DBMS 	数据库管理系统
+RDB		关系型数据库
+...
+
+3）数据库分类
+层次式数据库
+网络式数据库
+关系式数据库(普通使用)
+
+4）常见的数据库
+--》甲骨文的Oracle，市场占有率50%
+--》IBM的DB2，市场占有率20%
+--》微软的Sqlserver，市场占有15%
+
+--》Sun公司的Mysql
+--》开源Sqlite，轻量级嵌入式数据库
+
+5）数据库操作语言(SQL)
+
+2 Sqlite数据库安装
+1）在线安装sqlite3
+  sudo apt-get install sqlite3
+2）离线安装
+//Ubuntu 12.04（64位）
+sudo dpkg -i sqlite3_3.7.9-2ubuntu1.2_amd64.deb
+//Ubuntu 12.04（32位）
+sudo dpkg -i sqlite3_3.7.9-2ubuntu1_i386.deb
+3）测试
+在终端输入"sqlite3",正常可以进入sqlite3数据操作的命令行界面：
+SQLite version 3.7.9 2011-11-01 00:52:41
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> agahy;
+sqlite> .quit //退出
+
+4）sqlite3配置（忽略）
+ vi ~/.sqliterc
+.mode column  //显示数据时列对齐
+.header on    //显示表头
+.nullvalue "NULL" //数据表中空白字符串显示NULL
+ 
+5）拷贝testDB.db的数据库文件到当前工作目录;
+终端输入：“sqlite3 testDB.db”;
+sqlite> SELECT * FROM company;
+
+注：在数据库命令行界面中可以输入两种指令，一种以"."开头，是sqlite3自身的指令，还有一种是sql语句，以“;”结束
+
+6）常用的sqlite指令
+sqlite> .help //显示自身指令的帮助文档
+sqlite> .quit //退出命令行界面，回到控制终端
+sqlite> .exit //和.quit一样
+sqlite> .databases //查看当前数据库信息
+sqlite> .tables //查询数据中存在数据表的名字
+sqlite> .schema //查看数据表创建时信息
+
+注：Ctrl+L（清屏快捷键）
+
+3 在命令行使用SQL语句操作数据库
+1）创建数据库
+启动数据库时：sqlite3 xxx.db
+注：如果"xxx.db"不存在，在对数据库进行操作时将会自动完成创建;如果文件已存在，则直接对其操作。
+
+2）创建数据表
+语法：
+  CREATE TABLE 表名(
+  	列名1 类型 约束，
+  	列名2 类型 约束，
+  	...
+  	列名n 类型 约束);
+类型：
+	INT(整型数)
+	TEXT(文本字符串)
+	REAl(浮点数)
+	...
+约束：	
+	PRIMARY KEY ：主键约束,该列数据唯一,能加快对数据的访问
+	NOT NULL:非空约束，表示该列的数据不能为空
+eg：
+sqlite> CREATE TABLE student(
+   ...> id INT PRIMARY KEY NOT NULL,
+   ...> name TEXT NOT NULL,
+   ...> score REAL NOT NULL);
+sqlite> .tables
+company  student
+
+-------------------
+3）删除数据表
+语法：
+   DROP TABLE 表名;
+   
+4）插入数据
+语法：
+   INSERT INTO 表名
+   		(列名1,列名2,...)
+   			VALUES(数值1,数值2,...);
+eg：
+sqlite> INSERT INTO company
+   ...> (id,name,age,address,salary)
+   ...> VALUES(10018,"小乔",28,"杭州",12345.6);
+------------------------------
+sqlite> INSERT INTO company
+   ...> (name,id,salary,age)
+   ...> VALUES("大乔",10019,8800.8,29);
+------------------------------
+sqlite> INSERT INTO company
+   ...> VALUES(10021,"曹坯",26,"山东",6600);
+
+注：
+//查询数据表的所有数据
+SELECT * FROM company;
+
+5）删除数据
+语法：
+	DELETE FROM 表名 WHERE 条件表达式;
+eg:
+	sqlite> DELETE FROM company WHERE id=10029;
+	--------------
+   	sqlite> DELETE FROM company 
+  	   ...> WHERE age=29 and salary>8000;
+6）修改数据
+语法：
+ 	UPDATE 表名 
+ 		SET 列名1=数值1,列名2=数值2..
+ 			WHERE 条件表达式;
+eg:
+sqlite> UPDATE company SET age=19
+   ...> WHERE id=10010;
+sqlite> UPDATE company SET salary=salary+2000
+   ...> WHERE age>25 and age<35;
+sqlite> UPDATE company SET salary=salary+1000
+   ...> WHERE age<=25 or age>=35;
+ 
+7）查询数据
+语法：
+	SELECT 列名1,列名2,... FROM 表名
+		WHERE 条件表达式
+			ORDER BY 列名 ASC/DESC;
+	注：ASC升序、DESC降序
+eg：
+	sqlite> SELECT name,id,salary FROM company;
+	----------------------------
+	sqlite> SELECT * FROM company
+   	   ...> WHERE salary>8000
+       ...> ORDER BY salary DESC;
+
+练习：创建“menu.db”的数据库文件，在里面创建学生成绩数据表(student),列的字段依次为：学号(ID)、姓名(Name)、成绩(Score)。
+1）插入以下数据
+ID   	Name	Score
+1001 	杨健	80.5
+1002	老王	82.5
+1005	闵卫	95.5
+1003	jianggl	90.5
+1004	孟健	88
+1006	test	1000
+......
+2）删除test一条数据
+3）修改：jianggl-->蒋贵良
+4）查询显示(排序)
+
+--------------
+4 在QT使用SQlite数据库
+1）QSqlDatabase 	//建立qt和数据库连接
+eg：
+	//添加数据库驱动
+    QSqlDatabase db = 
+    	QSqlDatabase::addDatabase("QSQLITE");
+	//设置数据库名字，对于Sqlite3就是数据库文件名字"xx.db"
+    db.setDatabaseName("menu.db");
+	//打开数据库
+    bool ok = db.open();
+
+2）QSqlQuery //提供SQL语句的执行方法
+eg:
+	QSqlQuery query;
+	query.exec("sql语句字符串");
+
+3）QSqlQueryModel //执行查询语句和遍历结果集
+eg:
+QSqlQueryModel model;
+//执行select语句，把结果集保存到model对象中
+model.setQuery("SELECT语句")；
+//创建显示结果集组件
+QTableView *view = new QTableView;
+//显示结果集到view
+view->setModel(&model);
+
+《案例》学生成绩管理系统
+工程：Sqlite
+类名：SqliteDialog
+设计UI：
+组合框：valueComboBox、condComboBox
+操作按钮：
+	sortButton(排序按钮)
+	insertButton(插入按钮)
+	deleteButton(删除按钮)
+	updateButton(修改按钮)
+输入组件：
+	idEdit(学号输入组件)
+	nameEdit(姓名输入组件)
+	scoreEdit(成绩输入组件)
+	

@@ -1,0 +1,149 @@
+回顾：
+1 Qt设计师(designer)
+  xxx.ui --uic--> ui_xxx.h
+2 Qt创造器(qtcreator)
+
+====================================
+九 资源和图像
+《案例》图图秀
+1 下载图片资源
+ftp：material.tar.bz2
+解压：tar xvf material.tar.bz2
+
+2 资源管理器(RCC)
+1）创建资源脚本文件(xml)，描述所要用的资源图片：
+vi test.qrc
+<RCC>
+    <qresource prefix="/">
+        <file>0.jpg</file>
+    </qresource>
+</RCC>
+
+2）转换成C++源程序
+rcc test.qrc -o qrc_test.cpp
+
+3 绘图事件
+1）当程序开始运行或者窗口发生改变时，将会触发绘图事件，对应的虚函数paintEvent将被自动执行。
+void QWidget::paintEvent(QPaintEvent * event)；
+注：如果想在绘图事件被触发时执行自定义绘图操作，重写paintEvent虚函数即可。
+
+2）通过调用update()函数也可以手动触发绘图事件
+
+4 画家类QPainter
+1）QT中的二维的图形引擎，如果需要在widget窗口中绘制指定的图像，可以在paintEvent中，通过QPainter对象完成。
+2）创建画家对象
+  QPainter(QPaintDevice* device)
+  @device：绘制设备，可以是QWidget窗口
+3）绘制图像函数
+  drawImage(const QRect& rectangle, 
+  			const QImage & image)
+  @rectangle：要绘制的矩形区域
+    eg:
+    //获取一个图形组件的矩形区域
+    QRect rect = ui->图形组件->frameRect()
+  @image：要绘制的图片对象	
+    eg：
+    //利用资源文件中的图片构建QImage对象
+    QImage image(":/images/0.jpg");
+    注：":"表示资源文件路径
+-------
+5 实施
+1）使用qtcreator创建工程：ShowPics
+2）类名:ShowPicsDialog
+3）设计UI
+   注：父窗口对象名字不能修改
+--》frame组件 //用于显示图像
+   size policy：垂直策略选择“expanding”
+   frameshape: box //改变边框效果
+--》m_btnNext //切换下一张图片按钮
+--》m_btnPrev //切换上一张图片按钮
+--》运行查看ui效果
+4）向工程中添加资源文件
+--》将准备资源图片目录images拷贝到工程目录下
+--》添加新文件
+--》选择模板：Qt--》Qt Resource File
+--》指定资源文件名字：ShowPics
+--》进入资源编辑界面
+   添加前缀："/new/prefix" --> "/"
+   添加文件：将images目录下10个图片都加进来
+--》保存(Ctrl+s)
+
+十 目录和定时器
+1 目录操作QDir
+1）创建目录对象
+QDir(const QString & path)；
+@path:表示要访问的路径
+	--》绝对路径
+		QDir("/home/user/Documents")
+		QDir("C:/Documents and Settings")
+	--》相对路径
+		./images/landscape.png
+2）遍历和访问目录	
+QStringList	entryList(Filters filters);
+@filters：过滤器，用于指定要访问内容
+   --》QDir::Dirs //目录
+   --》QDir::Files //普通文件
+   --》QDir::NoDotAndDotDot //不包含"."和".."
+返回QStringList容器对象，保存所有的文件名。
+
+eg：遍历打印目录中普通文件
+   QDir dir("path..");
+foreach(QString file,
+		dir.entryList(QDir::Files)){
+	qDebug() << file;	
+}
+
+2 定时器使用QTimerEvent
+1)定时器器到时以后，会自动执行定时器事件函数
+  void timerEvent(QTimerEvent*);
+2)开始定时器
+  int QObject::startTimer(int interval);
+  @interval:定时器时间，单位毫秒
+  返回是定时器的ID；
+  注：每隔interval毫秒都会触发一个定时器
+3）停止定时器
+  void QObject::killTimer(int id);
+  @id:开始定时器时返回定时器ID
+
+《案例》摇奖机
+1）工程名 Ernie
+2）类名 ErnieDialog
+3）设计UI界面
+ --》frame
+   size policy：垂直策略选择“expanding”
+   frameshape: box //改变边框效果
+ --》pushbutton
+4）拷贝photos目录到工程目录下
+5）编码...
+6）测试...
+
+=================
+十一 鼠标和键盘事件
+1 鼠标事件处理
+#include <QMouseEvent>
+//鼠标按下
+QWidget::mousePressEvent(QMouseEvent*)
+//鼠标抬起
+QWidget::mouseReleaseEvent(QMouseEvent*) 
+//鼠标双击
+QWidget::mouseDoubleClickEvent(QMouseEvent*)
+//鼠标移动
+QWidget::mouseMoveEvent(QMouseEvent*) 
+
+//获取引发事件的鼠标按键
+Qt::MouseButton	button() 
+eg：判断当前引发鼠标的事件按钮是不是左键
+if(event->button == Qt::LeftButton){
+	qDebug() << "鼠标左键"
+}
+//获取鼠标点击的位置坐标
+QPoint	pos() const
+
+《案例》用鼠标拖拽label移动
+工程名：Mouse
+类名：MouseDialog
+设计ui：
+  设置label背景颜色：
+  --》autoFileBackground：打√
+  --》palette:点击“继承”->“改变调色板”
+  --》在调色板界面，点击快速按钮，选择一个颜色

@@ -1,0 +1,228 @@
+回顾：
+1 常用的SQL语句
+ CREATE TABLE 表名 (列名 类型 约束,...);
+ DROP TABLE 表名;
+ INSERT INTO 表名 (列名,...) VALUES(数值,...);
+ DELETE FROM 表名 WHERE 条件表达式;
+ UPDATE 表名 SET 列名=数值,.. WHERE 条件表达式;
+ SELECT 列名,... FROM 表名
+ 		WHERE 条件表达式
+ 			ORDER BY 列名 ASC/DESC;
+2 QT使用sqlite3
+1）建立qt和数据连接
+QSqlDatabase db = 
+	QSqlDatabase::addDatabase("QSQLITE");
+db.setDatabaseName("menu.db");
+db.open();
+2）数据库操作
+--》QSqlQuery query;
+	query.exec("sql语句");
+--》QSqlQueryModel model;
+	model.setQuery("select语句");
+	ui->tableView->setModel(&model);
+========================================
+今天:
+十三 QT多线程（QThread）
+1 创建线程方式
+1）方法1，QObject::moveToThread.
+
+class Worker : public QObject
+{
+    Q_OBJECT
+public slots:
+    void doWork(const QString &parameter){
+        /*...耗时或阻塞操作... */
+    }
+};
+
+class Controller : public QObject
+{
+    Q_OBJECT
+    //创建线程对象
+    QThread workerThread;
+public:
+    Controller() {
+    	//创建需要放在线程中执行的Worker对象
+        Worker *worker = new Worker;
+        //将Worker移动到线程中
+        worker->moveToThread(&workerThread);
+        //当发送operate信号时，dowork将被放在独立线程中执行
+        connect(this, &Controller::operate, worker, &Worker::doWork);
+        //开启线程
+        workerThread.start();
+    }
+signals:
+    void operate(const QString &);
+};
+
+2）方法2：继承QThread，重写run函数//推荐
+class WorkerThread : public QThread{
+	//线程入口函数
+    void run(void){
+        /*...耗时或阻塞操作... */
+    }
+};
+void MyObject::startWorkInAThread()
+{
+    WorkerThread *workerThread = 
+    		new WorkerThread(this);
+    //开始线程，重写的run将在独立线程中被执行
+    workerThread->start();
+}
+----------------------------
+2 线程相关操作函数
+1）线程等待//类似pthread_join()
+bool QThread::wait()
+2）线程退出//类似pthread_exit()
+void QThread::quit()[slots]
+void QThread::exit(0);
+3）开启线程//类似pthread_create
+void QThread::start();
+4）终止线程//类似pthread_cancel
+void QThread::terminate()
+//设置线程是否允许被终止
+QThread::setTerminationEnabled(true)
+eg：
+void run(void){
+	setTerminationEnabled(false);
+	//执行关键代码
+	setTerminationEnabled(true);
+}
+5)获取线程句柄(ID)
+QThread::currentThreadId()
+
+《案例》多线程打印消息
+工程名：Thread
+类名：ThreadDialog
+
+------------------------
+3 线程同步
+1）互斥锁(互斥量) QMutex
+eg：
+	QMutex mutex;//创建和初始化互斥锁
+	mutex.lock();//加锁，如果成功继承运行，如果失败当前线程将被阻塞。
+	mutex.unlock();//解锁
+
+	
+2）读写锁 QReadWriteLock
+QReadWriteLock lock;//构建和初始化读写锁
+
+//读文件线程
+void ReaderThread::run(){
+    ...
+    //1)加读锁
+    lock.lockForRead();
+    //2)成功读文件，失败阻塞
+    read_file();
+    //3)读文件结束，解锁
+    lock.unlock();
+    ...
+}
+//写文件线程
+void WriterThread::run(){
+    ...
+    //1）加写锁
+    lock.lockForWrite();
+    //2）成功写文件，失败阻塞
+    write_file();
+    //3）解锁
+    lock.unlock();
+    ...
+}
+3）信号量 QSemaphore
+//初始化信号量(有5个共享资源可用)
+QSemaphore sem(5);// sem.available() == 5
+//获取3个，剩余2个可用
+sem.acquire(3);// sem.available() == 2
+//获取2个，剩余0个可用
+sem.acquire(2);// sem.available() == 0
+//释放5个，剩余5个可用
+sem.release(5);// sem.available() == 5
+//释放5个(又分配了5个资源)，剩余10个可用
+sem.release(5);// sem.available() == 10
+//尝试获取1个资源，成功返回true，剩余9个
+sem.tryAcquire(1);// sem.available() == 9, returns true
+
+//尝试获取250个资源，失败了返回false，剩余9个
+sem.tryAcquire(250);// sem.available() == 9, returns false
+----------------
+《案例》生成者和消费者
+问题：
+1）生产者向仓库中存放数据，但是如果生产速度太快，那么将会把消费者还未来得及读走数据覆盖掉。
+2）消费者从仓库中获取数据，但是如果消费速度太快，那么它将会越过生产者读到一些"垃圾"数据.
+解决：两个信号量
+--》一个信号量(freeSpace)控制生产者，如果仓库满则阻塞
+--》另一个信号量(usedSpace)控制消费者，如果仓库空则阻塞
+
+eg:
+生产者线程：
+while(1){
+	P(freeSpase-1)
+	生产一个数据，放入仓库
+	V(usedSpace+1)
+}
+
+消费者线程:
+while(1){
+	P(usedSpace-1)
+	从仓库中获取一个数据，消费
+	V(freeSpase+1)
+}
+
+4）条件变量 QWaitCondition
+QWaitCondition condition;//创建和初始化条件变量
+condition.wait(&mutex);//解锁，并阻塞当前线程
+condition.wakeOne();//唤醒一个阻塞的线程
+condition.wakeAll();//全部唤醒
+=======================
+十四 QT网络编程
+1 网络协议层次（QSI 七层）
+应用层：HTTP、FTP、TFTP、DNS...
+表示层
+会话层
+传输层：TCP UDP
+网络层：IPv4 IPv6
+数据链路层：以太网
+物理层
+
+2 socket编程 C/S
+1)tcp编程
+服务器端：
+  --》创建套接字:socket(字节流)
+  --》准备服务器地址:sockaddr_in{ip/port}
+  --》绑定bind
+  --》监听listen
+  --》等待客户端的连接：accept
+  --》//创建子进程或子线程
+  --》通信
+  	  read()/write()
+  	  recv()/send()
+  --》关闭 close
+
+客户端：
+  --》创建套接字:socket()
+  --》准备服务器地址:sockaddr_in{ip/port}
+  --》和服务器连接:connect
+  --》通信
+   	  read()/write()
+  	  recv()/send()
+  --》关闭 close
+-------------------------------------
+2）udp编程
+服务器端：
+  --》创建套接字:socket(数据包)
+  --》准备服务器地址:sockaddr_in{ip/port}
+  --》绑定bind
+  --》通信
+  	recvfrom()/sendto()
+  --》关闭 close()
+
+客户端：
+  --》创建套接字:socket(数据包)
+  --》准备服务器地址:sockaddr_in{ip/port}
+  --》通信
+  	read()/recvfrom()
+  	sendto()
+  --》关闭 close()
+
+练习：复习UC网络编程

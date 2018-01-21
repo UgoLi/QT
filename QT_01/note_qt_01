@@ -1,0 +1,201 @@
+QT(跨平台C++ GUI应用程序开发框架)
+时间：8
+
+==================================================
+一 QT的概述
+1 QT的历史发展
+1）1991年诞生 Haavard Nord 和Eirik Chambe-Eng
+2）1994年 创立了奇趣公司(Trolltech)
+3）2005年 QT4.0发布 
+4）2008年 诺基亚收购了奇趣科技
+5）2009年 开放了QT源代码
+6）2012年 将诺基亚将QT业务卖给了Digia公司
+7）2013年     发布QT 5.0
+   2013年7月  发布QT 5.1
+   2013年12月 发布QT 5.2
+8）2014年 Digia成立子公司The Qt Company www.qt.io
+
+--------------------------------------------------
+2 Qt 5.4 安装
+1）到官网下(www.qt.io)载QT安装包
+2）运行安装包，根据提示选择安装组件
+
+安装完成之后会自动弹出qt的集成开发环境
+
+qt应用程序需要openGL(三维图形引擎)，如果系统中没有需要单独安装:
+    sudo apt-get install "openGL相关库"
+
+3）配置环境变量
+将下面目录配置到PATH环境变量
+/home/ugo/Qt5.9.0/Tools/QtCreator/bin/
+/home/ugo/Qt5.9.0/5.9/gcc_64/bin/
+
+sudo vi /etc/environment
+
+4）重启/注销后测试qt环境
+输入 qmake -v查看当前qt版本
+输入 qcreator 进入集成开发环境
+
+--------------------------------------------------
+3 QT中相关工具介绍
+1）assistant(帮助手册)
+ 在终端输入"assistant"即可进入帮助手册界面
+
+2）qmake(QT构建器)
+ qmake -v  查看当前qt版本和对应QT版本
+ qmake -project 生成一个".pro"的工程文件
+ qmake 根据".pro"生成编译链接脚本Makefile
+    执行"make"根据Makefile完成编译，生成可执行文件
+
+3）designer(Qt设计师)
+ 图形编译器，用于界面设计，保存到".ui"文件中
+ 在终端输入"designer"，即可进入设计师界面
+
+4）uic(转换器)
+ 用于.ui文件转换为.h的头文件
+
+5）rcc(资源管理器)
+ 把资源文件(图片、视频等)转换器为.cpp源文件
+ 
+6）moc(元对象编译器)
+ 将QT中扩展的语法还原成标准C++程序
+
+7）qtcreator(QT创造器)
+ Qt的集成开发环境(IDE)，包含上面所有工具。
+
+4 qt帮助手册的使用
+eg:QApplication
+1）前面说明信息：
+Header:#include <QApplication> //头文件
+qmake:QT += widgets  //构建选先，需要写道工程文件中
+Inherits:QGuiApplication  //继承关系
+
+2）public types(公有类型，如枚举)
+
+3）Properties（成员变量）
+
+4）Public Functions（公有成员）
+注：重点关注构造函数
+
+5）Reimplemented Public Functions （公有虚函数）
+
+6）Public Slots（公有的槽函数）
+class A{
+        Q_OBJECT//调用moc 元编译器
+public slots://自定义宏
+        void slot_func(){}//槽函数
+};
+
+7）Signals（信号函数）
+class A{
+        Q_OBJECT
+signal：
+        void signal_func();//信号函数
+};
+
+8）Static Public Members（静态成员函数）
+
+9）Reimplemented Protected Functions（保护虚函数）
+
+10）Macros（自定义宏）
+
+11）Detailed Description（详细描述）
+---------------------------------------------------------
+
+二 第一个QT程序
+1 创建工程目录：Hello
+注：每个qt应用程序都必须放到一个独立目录下
+注：将来会以目录名字作为工程文件名，最终生成的源代码，工程文件，可执行
+文件存放在这里。
+2 进入工程目录，编写源代码
+3 qmake -project 构建工程文件 "Hello.pro"
+添加：QT += widgets //表示需要加载的和widget有关的库文家和头文件
+
+TEMPLATE = app //将来该工程要被编译成应用程序
+TARGET = Hello //可执行文件名字
+INCLUDEPATH += . //头文件路径
+
+# Input
+SOURCES += Hello.cpp //源文件
+QT += widgets
+
+4 执行"qmake"，生成编译链接脚本Makefile
+
+5 make，根据Makefile完成和链接
+注：如果代码有语法错误，会有相应的提示，在修改代码后，直接make，不需要重新进行
+3、4步
+
+注：make clean //清理工程文件
+问题1:QApplication：没有那个文件或目录
+解决：在工程文件中添加，QT += widgets
+
+问题2：在make时提示时间戳错误，编译时死循环
+解决：修改系统时间
+
+6 测试
+ ./Hello 显示窗口，拖、拉、改变尺寸、退出
+
+
+
+
+三 QT字符串（Qstring）和字符编码
+1 常见编码
+1）linux 中默认utf-8
+2) window中默认使用ANSI()
+3) QT 使用unicode(ucs-2)
+
+2 QString类
+1）QT内部使用QString表示字符串，默认编码方式unicode编码
+2）
+3）
+
+注：在QT5中使用const char*构造QString字符串时内部默认使用fromUtf8函数自动将utf-8
+转换为unicode。
+
+3 编码转换 QTextCode
+首先，确定当前编码器使用的编码方式：
+eg:
+    vi默认utf-8
+1）构造编码对象
+QTextcode* coder=
+  QTextCode ：：codeFoeName("GBK")
+2）通过编码对象把"const char*"字符串转化为QT内部的unicode编码方式
+ coder->uniCode("...");
+
+练习：创建按钮(QPushButton)组件，文本显示"我是一个按钮",并显示。
+1)甚至编码方式：GBK
+底行命令：set fileencodeing=GBK
+再次：make ，运行乱码
+2）增加GBK编码对象，将中文字符串转换为unicode再次make，运行可以正常显示。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

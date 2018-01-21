@@ -1,0 +1,31 @@
+项目《Http 客户端》
+需求：实现从"http://code.tarena.com.cn/"
+1）实现下载代码界面显示
+2）增加验证登录对话框
+3）处理"子目录"链接
+4）实现对指定格式的文件下载
+
+HTTP协议：
+请求：客户端给服务器发送消息
+响应：服务器给服务器返回消息
+
+QT中相关类：
+1）QNetworkAccessManager//管理请求和响应
+2）QNetworkRequest //请求
+3）QNetworkReply   //响应
+4）QUrl //网络地址
+5）QFile/QFileInfo //文件相关操作
+6）显示组件
+ --》QTextBrowser //文本浏览器
+ --》QProgressBar //进度条，显示文件下载进度
+ 
+ 工程名:HttpClient
+ 类名:MainWindow
+ 
+ //忽略下面提示
+ qt.network.ssl: QSslSocket: cannot resolve SSLv2_client_method
+qt.network.ssl: QSslSocket: cannot resolve SSLv2_server_method
+
+项目总结：
+不足：不能实现多文件同时下载
+扩展：通过多线程实现多文件的下载

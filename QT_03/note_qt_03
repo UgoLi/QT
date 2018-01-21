@@ -1,0 +1,128 @@
+回顾：
+1 信号和槽机制
+1）对象之间的通信的方法
+2）信号和槽连接
+   QObject::connect(
+   		信号发送对象指针,SIGNAL(信号函数),
+   		信号接收对象指针,SLOT(槽函数));
+3）信号和槽连接要求：
+--》参数要一致
+--》可以带有缺省参数
+--》信号参数可以多于槽函数
+--》一个信号可以连接多个槽
+--》多个信号可以连接到一个槽
+--》信号级联
+
+2 容器窗口(父窗口)
+  QWidget
+    --》QDialog
+    --》QMainWindow
+
+3 基于对象QT编程//不推荐
+4 面向对象QT编程//推荐
+《案例》显示系统时间
+==============================
+今天：
+七 QT设计师使用
+《案例》使用设计师，重构加法计算器
+1 创建工程目录
+2 进入工程目录，执行“designer”，启动设计师
+3 选择模板(父窗口)：Dialog Without Button
+4 设计UI界面
+1）从左侧找到对应的组件拖拽到父窗口
+QPushButton
+QLineEdit
+QLabel
+2）在右侧属性编辑器完成父窗口和每个组件属性设置
+注：如果点击时空白位置，设置属性是父窗口，如果想设置某个组件属性，需要先点击一下
+-->父窗口
+  objectName(对象名字)：CalculatorDialog
+  注：将来会生成一个和父窗口名字相同的类。
+  windowTitle(窗口标题):加法计算器
+  Font(字体):点大小 18
+-->修改左操作数
+  objectName(对象名字)：m_editX
+  Alignment:水平 AlignRight
+-->修改左操作数
+  objectName(对象名字)：m_editY
+  Alignment:水平 AlignRight  
+-->显示结果
+  objectName(对象名字)：m_editZ
+  Alignment:水平 AlignRight  
+  readOnly：打√
+-->加号label
+  双击将文本改成 "+"
+-->等号按钮
+  objectName(对象名字)：m_btnCalc
+  双击将文本改成 "="
+  enable：去掉√（禁用）    
+-->添加水平布局  
+3）保存(ctrl+s)
+  CalculatorDialog.ui
+4）关闭
+
+5 将xx.ui转换为ui_xx.h
+uic CalculatorDialog.ui -o ui_CalculatorDialog.h
+class Ui_CalculatorDialog{
+public:
+	图形组件的声明;
+	void setupUi(...){//界面初始化
+		//图形组件的创建
+		//图形组件属性的设置
+	}
+};
+namespace Ui{
+  class CalculatorDialog
+	:public Ui_CalculatorDialog{};
+}
+Ui::CalculatorDialog<等价>Ui_CalculatorDialog
+
+使用该头文件的方法1：
+class xx:public Ui::CalculatorDialog{
+	//界面类中代码直接继承过来使用
+};
+
+使用该头文件的方法2：
+class xx:public Ui::CalculatorDialog{
+public：
+	//通过ui成员变量去访问界面类中代码
+    Ui::CalculatorDialog* ui;
+};
+
+6 编写代码...
+7 构建和编译..
+------------------
+《案例》利用QT设计师，实现登录对话框的界面
+1 创建工程Login
+2 进入工程目录设计UI
+  参数login.jpg
+3 将ui文件转换成.h文件
+uic LoginDialog.ui -o ui_LoginDialog.h
+
+=============================
+八 QT集成开发环境(qtcreator)
+《案例》使用qtcreator，再次重构加法计算器
+1 在终端输入“qtcreator”进入qt集成开发环境界面
+2 在欢迎模式下，创建工程
+1）点击"new project"
+2）选择模板：
+   Application->Qt Widgets Application
+3）指定项目名字(Calculate3)和路径(day03)
+   注：将来会自动创建工程目录"Calculate3"
+4）开发工具配置(默认)
+5）指定类信息
+   类名：CalculatorDialog
+   基类：QDialog
+   注：会自动和类名相对应的头文件源文件和ui文件
+   CalculatorDialog.h
+   CalculatorDialog.cpp
+   CalculatorDialog.ui
+6）项目管理（忽略）
+
+3 双击“xx.ui”进入设计模式(designer)，设计界面..
+4 编写源代码
+5 编译和测试..
+注：项目模式 shadow build，使用影子构建方式时，会将目标文件和源代码放在不同的目录下。
+ 
+ 
+练习：使用qtcreator重构登录对话框案例

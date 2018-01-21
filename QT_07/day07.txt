@@ -1,0 +1,118 @@
+回顾：
+1 QT多线程
+eg:
+1）继承QThread
+class WorkerThread:public QThread{
+	2）重写线程入口函数
+	void run(){
+		//在独立线程中被执行
+	}
+};
+WorkerThread thread;
+thread.start();
+
+2）线程同步
+互斥锁 QMutex
+读写锁 QReadWriteLock
+信号量(PV操作) QSemaphore
+条件变量 QWaitCondition
+
+十四 QT网络编程
+1 网络协议层次（QSI 七层）
+2 socket编程 C/S
+...
+3 QT网络编程相关类
+1）QHostAddress(网络地址)
+//使用linux网络地址结构
+QHostAddress(const sockaddr* sockaddr)
+//使用字符串形式表示IP地址"xx.xx.xx.xx"
+QHostAddress(const QString& address)
+//设置IP地址
+bool setAddress(const QString & address)
+//转IP地址对象转换字符串
+QString	toString() const
+
+//专用的IP地址：
+QHostAddress::LocalHost//本地地址，用于测试
+QHostAddress::Broadcast//局域网广播地址
+QHostAddress::Any //任意地址，常用于服务器
+
+2）QAbstractSocket(套接字基类)
+//绑定
+bind(IP, Port)
+bind(Port)
+//连接服务器，常用于TCP客户端
+connectToHost(IP, Port)；//类似UC：connect
+//获取当前套接字状态
+SocketState	state() const
+//获取当前套接字等待读取字节数
+qint64	bytesAvailable() const
+
+//连接成功时被发送
+connected()[signal]
+//断开连接时被发送
+disconnected()[signal]
+//网络异常
+error(socketError)[signal]
+//套接字有新数据到来将被发送
+readyRead()[signal]
+
+//读操作
+read()/readAll() 
+//写操作
+write()
+
+3 UDP编程(QUdpSocket)
+//判断是否有等待读取的数据包
+bool hasPendingDatagrams()
+//获取等待读的数据包的字节数
+qint64	pendingDatagramSize() 
+//读操作
+qint64	readDatagram(char* data, qint64 maxSize, QHostAddress* address = 0, quint16* port = 0)
+//写操作
+qint64 writeDatagram(const char* data, qint64 size, const QHostAddress & address, quint16 port)
+qint64 writeDatagram(const QByteArray& datagram, const QHostAddress & host, quint16 port)
+
+《案例》UDP网络广播
+1）发送端
+--》指定广播地址:  "255.255.255.255"
+--》指定广播端口:  port>1024 && port<48000
+   eg:8888
+--》用户输入广播消息
+--》使用定时器，通过UDP套接字每隔1s发送一次广播
+mkdir Broadcast
+工程名:send
+类名：sendDialog
+
+2）接收端
+--》绑定接收广播的端口:bind(port)
+--》接收广播消息，并显示
+工程名:receive
+类名：receiveDialog
+
+4 TCP编程（QTcpSocket）
+1）QTcpServer //用于创建TCP服务器
+//有新的客户端和服务器建立连接时被发送
+void newConnection()[signal]
+//获取和客户端通信的套接字对象
+QTcpSocket* nextPendingConnection()
+2）QTcpSocket
+
+《案例》网络聊天室
+1）服务器端
+--》使用QTcpServer创建tcp服务器
+--》接收客户端发来的消息
+--》转发消息到所有在线客户端
+mkdir Netchat
+工程名：Server
+类名：ServerDialog
+
+2）客户端
+--》使用QTcpSocket创建和tcp通信套接字对象
+--》向服务器发送聊天消息
+--》接收其它客户端聊天消息并显示
+工程名：Client
+类名：ClientDialog
+
+
+

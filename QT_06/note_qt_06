@@ -1,0 +1,202 @@
+
+=========================================================
+十三 QT多线程
+1 创建线程方式
+1）方法1：QObject::moveToThread.
+class Worker : public QObject
+  {
+      Q_OBJECT
+
+  public slots:
+      void doWork(const QString &parameter) {
+          QString result;
+          /* ... here is the expensive or blocking operation ... 耗时或阻塞操作*/
+          emit resultReady(result);
+      }
+
+  signals:
+      void resultReady(const QString &result);
+  };
+
+  class Controller : public QObject
+  {
+      Q_OBJECT
+      //创建线程对象
+      QThread workerThread;
+  public:
+      Controller() {          
+	  Worker *worker = new Worker;//创建需要在线程中运行的对象
+          //将worker移到线程中
+	  worker->moveToThread(&workerThread);
+ 
+	  //当发送operate信号时，执行worker对象
+          connect(this, &Controller::operate, worker, &Worker::doWork);
+
+          workerThread.start();//开启线程
+      }
+  };
+
+The code inside the Worker's slot would then execute in a separate thread. 
+However, you are free to connect the Worker's slots to any signal, from 
+any object, in any thread. It is safe to connect signals and slots across 
+different threads, thanks to a mechanism called queued connections.
+
+2）方法2：继承QTread,重写QTread虚函数run()
+
+Another way to make code run in a separate thread, is to subclass QThread 
+and reimplement run(). For example:
+
+  class WorkerThread : public QThread
+  {
+      Q_OBJECT
+      void run() override {//重写虚函数
+          QString result;
+          /* ... here is the expensive or blocking operation ... */
+          emit resultReady(result);
+      }
+  signals:
+      void resultReady(const QString &s);
+  };
+
+  void MyObject::startWorkInAThread()
+  {
+      WorkerThread *workerThread = new WorkerThread(this);
+      workerThread->start();//开始线程，重写的run将在独立线程中被执行
+  }
+
+----------------------------------------------------------------------
+2 线程相关函数
+1)等待wait~=pthread_join 
+2)退出quit/exit~=pthread_exit 
+3)开始start~=pthread_create 
+4)终止terminate~=pthread_cancel
+
+void run(void){
+	setTerminationEnabled(false)
+	//执行关键代码
+	setTerminationEnabled(true)
+}
+
+5)QThread::currentThreadId() //获取线程句柄(ID)
+
+《案例》多线程打印消息
+
+----------------------------------------------------------------------
+3 线程同步
+1）互斥锁 QMutex
+eg:
+	QMuetx muetx;//创建和初始化互斥锁
+	mutex.lock();//加锁，如果成功继续运行，如果失败当前线程将被阻塞
+	mutex.lock();//加锁，不能加锁，不等待线程继续运行
+	
+2）读写锁 QReadWriteLock
+eg:
+ QReadWriteLock lock;//构造和初始化读写锁
+
+//读文件线程
+  void ReaderThread::run()
+  {
+      ...
+      //1）加读锁
+      lock.lockForRead();
+      //2）成功-》读文件，失败-》阻塞
+      read_file();
+      //3）读文件结束，解锁
+      lock.unlock();
+      ...
+  }
+
+  void WriterThread::run()
+  {
+      ...
+      
+      lock.lockForWrite();
+      write_file();
+      lock.unlock();
+      ...
+  }
+
+3）信号量 QSemaphore
+
+//初始化信号量（有5个共享资源可用）
+ QSemaphore sem(5);      // sem.available() == 5
+
+  sem.acquire(3);         // sem.available() == 2
+  sem.acquire(2);         // sem.available() == 0
+  sem.release(5);         // sem.available() == 5
+  sem.release(5);         // sem.available() == 10
+
+  sem.tryAcquire(1);      // sem.available() == 9, returns true
+  sem.tryAcquire(250);    // sem.available() == 9, returns false
+
+------------------------------------
+《案例》生产者和消费者
+
+PV 多个临界资源，一个生产者信号量(仓库资源满，阻塞)，一个消费者信号量(仓库资源空，阻塞)
+
+4）条件变量 QWaitCondition
+QWaitcondition condition;//创建和初始条件变量
+condition.wait(&mutex);//等待条件，不满足解锁，并阻塞当前线程
+		        //满足加锁，线程继续运行
+condition.wakeOne();//唤醒一个阻塞的线程
+condition.wakeAll();//全部唤醒
+
+
+================================================================================
+十四 QT网络编程
+1 网络协议层次QSI 七层
+应用层：HTTP、FTP、TFTP、DNS
+表示层：
+会话层：
+传输层：TCP、UDP
+网络层：IPv4 IPv6
+数据链路层：
+物理层：
+
+2 socket编程 C/S
+1）tcp编程
+服务器端：
+	--》创建套接字：socket(数据流)
+	--》准备服务器地址：struct sockaddr_in{ip/port}
+	--》绑定：bind
+	--》监听：listen
+	--》等待客户端的链接：accept
+	--》创建子进程或子线程
+	--》通信
+		read()/write()
+	   	recv()/send()
+	--》关闭：close()
+
+客户端:
+	--》创建套接字
+	--》准备服务器地址：struct sockaddr_in{ip/port}
+	--》和服务器连接接：connect()
+	--》通信
+		read()/write()
+		recv()/send()
+	--》关闭 close
+
+2 Udp编程
+服务器端：
+	--》创建套接字：socket(数据包)
+	--》准备服务器地址：struct sockaddr_in{ip/port}
+	--》绑定：bind
+	--》通信
+		recvfrom()/sendto()
+	--》关闭 close()
+	
+客户端：
+	--》创建套接字：socket(数据包)
+	--》准备服务器地址：struct sockaddr_in{ip/port}
+	--》绑定：bind
+	--》通信
+		read()/recvfrom()
+		sendto()
+	--》关闭 close()
+
+
+
+
+
+
+

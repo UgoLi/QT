@@ -1,0 +1,33 @@
+#include "DrawerToolBoxDialog.h"
+#include "ui_DrawerToolBoxDialog.h"
+
+DrawerToolBoxDialog::DrawerToolBoxDialog(QWidget *parent) :
+    QToolBox(parent),
+    ui(new Ui::DrawerToolBoxDialog)
+{
+    ui->setupUi(this);
+    ui->toolButton_1->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/11.jpg"));
+    ui->toolButton_2->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/12.jpg"));
+    ui->toolButton_3->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/13.jpg"));
+    ui->toolButton_4->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/14.jpg"));
+    ui->toolButton_5->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/15.jpg"));
+    ui->toolButton_21->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/21.jpg"));
+    ui->toolButton_22->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/22.jpg"));
+    ui->toolButton_31->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/31.jpg"));
+    ui->toolButton_32->setIcon(
+                QPixmap("../BaseDialog/Dialogtest/DrawToolBox/head portrait/32.jpg"));
+}
+
+DrawerToolBoxDialog::~DrawerToolBoxDialog()
+{
+    delete ui;
+    qDebug()<<"DrawerToolBox::~DrawerToolBox";
+}

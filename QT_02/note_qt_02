@@ -1,0 +1,143 @@
+
+=============================================================
+四 信号和槽(重点掌握)
+1 概念
+    信号和槽是QT自定义的通讯机制，实现不同对象之间的数据交互。
+eg:QPushButton\QLabel,创建一个QT应用程序包含两个组件：按钮和
+标签，实现点击按钮关闭标签。
+
+2 定义
+1）信号
+eg:
+    class QPushButton:public QObject{
+        Q_OBJECT;//标识元对象编译器处理
+    signal:
+        void clicked();//点击按钮组件发射的信号
+    };
+2）槽
+eg:
+    class QLabel:public QObject{
+        Q_OBJECT;
+    public:
+        void close(){};//当其他对象发来信号时，自动被执行
+    };
+    注：槽函数可以直接连接到其他对象的信号，也可以当做普通成员函数来使用。
+
+3 信号和槽的连接
+QObject::connect(
+    const QObject *sender, //信号的发送对象（QObject子类对象指针都可以）
+    const char *signal, //信号函数，SIGNAL(信号函数(形参表))，例，SIGNAL(clicked())
+    const QObject *receiver, //信号的接受对像（QObject子类对象指针都可以）
+    const char *method, //要执行的槽函数(SLOT(槽函数(形参表)))，例，SLOT(close())
+    Qt::ConnectionType type = Qt::AutoConnection//连接方式，0.自动，1.同线程，2.多线程)
+
+4 信号和槽连接要求(信号函数参数大于等于槽函数)
+1）信号函数和槽函数参数要一致
+eg:
+    QObeject::connect(A,SIGNAL(sigfun(int)),B,SLOT(slotfun(int)));//ok
+    QObeject::connect(A,SIGNAL(sigfun(int)),B,SLOT(slotfun(int,int)));//err
+2）可以带有缺省参数
+    QObeject::connect(A,SIGNAL(sigfun(int)),B,SLOT(slotfun(int,int=0)));//ok
+3）信号函数参数可以多余槽函数
+    QObeject::connect(A,SIGNAL(sigfun(int,int)),B,SLOT(slotfun(int)));//ok
+4）一个信号可以连接到多个槽函数
+    QObeject::connect(A,SIGNAL(sigfun(int)),B1,SLOT(slotfun1(int)));//ok
+    QObeject::connect(A,SIGNAL(sigfun(int)),B2,SLOT(slotfun2(int)));//ok
+    注：当A发送信号时，B1和B2的槽函数都会被执行，执行顺训不确定
+5）多个信号可以被连接到一个槽函数
+    QObeject::connect(A1,SIGNAL(sigfun1(int)),B,SLOT(slotfun(int)));//ok
+    QObeject::connect(A2,SIGNAL(sigfun2(int)),B,SLOT(slotfun(int)));//ok
+    注：无论A1还是A2发送信号，B的槽函数都会被执行
+6）信号级联：两个信号可以直接连接
+    QObeject::connect(A1,SIGNAL(sigfun1(int)),A2,SLOT(sigfun2(int)));//ok
+    QObeject::connect(A2,SIGNAL(sigfun2(int)),B,SLOT(slotfun(int)));//ok
+    注：当A1发送信号时，A2的信号也会被发送，进而B的槽函数被执行
+
+---------------------------------------------------------------------------
+五 容器窗口(父窗口)
+1 概念：父窗口用于停靠其他组件
+   如果一个组件家在创建时指定父窗口，那么就会停靠在符窗口上面，如果不指定，
+   就会飘在外面形成对立的窗口。
+2 常用的父窗口类：
+    QWidget
+    QDialog
+    QMainWindow
+    注：所有的QWidget的子类都可以做父窗口，但是常用的父窗口类只有上面三个，
+    其中QDialog称为对话框，QMainWindow称为注窗口，QWidget是它们的基类。
+
+3 两个常用函数
+1）调整窗口的大小
+    resize()
+2）移动窗口位置
+    move(int x,int y)
+案例：创建按钮和标签组件并停靠父窗口上。
+
+
+--------------------------------------------------------------------------
+案例：事件同步，滑块和选值框保持同步执行
+1）滑块类QSlider
+QSlider::QSlider(水平/垂直,父窗体)
+void setRange(最小,最大);//设置滑动范围
+void setValue(int 当前位置);//设置滑块当前位置
+void valueChanged(当前位置);//滑块滑动时发送的信号
+
+2）选值框QSpinBox
+QSpinBox(父窗体);
+void setRange(int minimum, int maximum);
+void setValue(int val//当前数值);
+void valueChanged(当前数值);
+
+----------------------------------------------------------------
+六 面向对象的QT编程
+1 基于对象的QT编程//不推荐
+2 面向对象的QT编程//推荐
+案例：加法计算器
+思路：
+class CalculatorDialog:public QDialog{
+    Q_OBJECT//moc
+public:
+    CalculatorDialog(){
+        //初始化UI界面
+        //连接信号和槽
+    }
+public slots:
+    //左右操作数输入数据时执行的槽函数
+    void 使能等号按钮() {}
+    //点击等号按钮时执行槽函数
+    void 显示计算结果() {}
+
+private:
+    QLineEdit
+    QPushButton
+    QLabel
+};
+注：类的声明和定义分开到不同文件去实现
+eg:
+    CalculatorDialog.h//类声明
+    CalculatorDialog.cpp//类实现
+//类的使用
+int main(int argc,char** argv){
+    QApplication app(argc,argv);
+    CalculatorDialog calc();
+    calc.show;
+    return app.exec();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

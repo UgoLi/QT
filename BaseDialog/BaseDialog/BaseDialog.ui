@@ -1051,7 +1051,7 @@
        <item row="9" column="2">
         <widget class="QLineEdit" name="m_picPathEdit">
          <property name="text">
-          <string>/root/Desktop/CSDN/QT/基本对话框/BaseDialog/ShapeWidgetImage/16.png</string>
+          <string>../BaseDialog/ShapeWidgetImage/16.png</string>
          </property>
         </widget>
        </item>
@@ -1093,8 +1093,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>75</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1106,8 +1106,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>75</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1119,8 +1119,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>75</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1132,8 +1132,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>75</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1145,8 +1145,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>75</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1158,8 +1158,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>140</height>
+          <width>448</width>
+          <height>116</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1212,8 +1212,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>140</height>
+          <width>448</width>
+          <height>116</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1266,8 +1266,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>447</width>
-          <height>125</height>
+          <width>448</width>
+          <height>87</height>
          </rect>
         </property>
         <attribute name="label">
